@@ -21,11 +21,10 @@ services:
     depends_on:
       - deepstack
     environment:
-      DEEPSTACK_URL: "http://deepstack-ai:5000"
-<<<<<<< HEAD
+      DEEPSTACK_URL: "http://localhost:5000"
+
       PASSWORD: "9999"
-=======
->>>>>>> Initial commit
+
     volumes:
       - ./app:/usr/src/app
     restart: unless-stopped
