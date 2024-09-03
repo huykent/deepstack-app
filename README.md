@@ -90,6 +90,54 @@ Nếu bạn đang chạy ứng dụng trực tiếp bằng Node.js, hãy dừng 
 - **index.js**: Tệp server Node.js chính.
 - **faces.json**: Tệp JSON lưu trữ dữ liệu về các khuôn mặt đã tải lên.
 
+
+Để tự động hóa quá trình cài đặt bao gồm việc clone repository và chạy script, bạn có thể viết một file shell script mới (ví dụ: `setup.sh`) để thực hiện các bước này. Dưới đây là cách bạn có thể tạo file `setup.sh`:
+
+### Nội Dung của `setup.sh`
+
+```bash
+#!/bin/bash
+
+# Xóa các tệp tin hoặc thư mục cũ
+rm -rf deepstack-app
+
+# Clone repository từ GitHub
+git clone https://github.com/huykent/deepstack-app.git
+
+# Chuyển đến thư mục của repository
+cd deepstack-app
+
+# Cấp quyền thực thi cho script cài đặt
+chmod +x install.sh
+
+# Chạy script cài đặt
+./install.sh
+```
+
+
+
+## Hướng Dẫn Cài Đặt
+
+Để cài đặt và cấu hình dự án, bạn có thể sử dụng script tự động hóa `setup.sh`. Thực hiện các bước sau:
+
+1. **Tải về và cấp quyền thực thi cho script cài đặt:**
+
+   ```bash
+   curl -O https://github.com/huykent/deepstack-app/raw/main/setup.sh
+   chmod +x setup.sh
+   ```
+
+2. **Chạy script cài đặt:**
+
+   ```bash
+   ./setup.sh
+   ```
+
+Script này sẽ tự động clone repository, cấp quyền thực thi cho script cài đặt, và chạy nó để hoàn tất cài đặt và cấu hình.
+
+
 ## Giấy phép
 
 Dự án này được cấp phép theo Giấy phép MIT.
+
+
