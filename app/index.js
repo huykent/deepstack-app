@@ -17,9 +17,19 @@ app.use(express.static('public'));
 // Multer setup
 const upload = multer({ dest: 'uploads/' });
 
-// Read environment variables
-const { DEEPSTACK_URL, PASSWORD } = process.env;
+// Define the URL and password directly in the code
+const DEEPSTACK_URL = 'http://192.168.0.23:5000';  // Update this with your DeepStack URL
+const PASSWORD = 'yourpassword';  // Update this with your password
 
+// Handle password check
+app.post('/check-password', (req, res) => {
+    const { password } = req.body;
+    if (password === PASSWORD) {
+        res.json({ success: true });
+    } else {
+        res.json({ success: false });
+    }
+});
 // Handle password check
 app.post('/check-password', (req, res) => {
     const { password } = req.body;
