@@ -90,6 +90,7 @@ Nếu bạn đang chạy ứng dụng trực tiếp bằng Node.js, hãy dừng 
 - **index.js**: Tệp server Node.js chính.
 - **faces.json**: Tệp JSON lưu trữ dữ liệu về các khuôn mặt đã tải lên.
 
+<<<<<<< HEAD
 
 Để tự động hóa quá trình cài đặt bao gồm việc clone repository và chạy script, bạn có thể viết một file shell script mới (ví dụ: `setup.sh`) để thực hiện các bước này. Dưới đây là cách bạn có thể tạo file `setup.sh`:
 
@@ -141,3 +142,8 @@ Script này sẽ tự động clone repository, cấp quyền thực thi cho scr
 Dự án này được cấp phép theo Giấy phép MIT.
 
 
+=======
+## Giấy phép
+
+Dự án này được cấp phép theo Giấy phép MIT.
+>>>>>>> Initial commit

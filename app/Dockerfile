@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Sử dụng image Node.js chính thức làm base image
 FROM node:18
 
@@ -16,3 +17,18 @@ EXPOSE 3000
 
 # Chạy ứng dụng khi container khởi động
 CMD ["npm", "start"]
+=======
+FROM node:14
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["node", "index.js"]
+>>>>>>> Initial commit

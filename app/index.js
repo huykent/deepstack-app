@@ -17,19 +17,9 @@ app.use(express.static('public'));
 // Multer setup
 const upload = multer({ dest: 'uploads/' });
 
-// Define the URL and password directly in the code
-const DEEPSTACK_URL = 'http://192.168.0.23:5000';  // Update this with your DeepStack URL
-const PASSWORD = 'yourpassword';  // Update this with your password
+// Read environment variables
+const { DEEPSTACK_URL, PASSWORD } = process.env;
 
-// Handle password check
-app.post('/check-password', (req, res) => {
-    const { password } = req.body;
-    if (password === PASSWORD) {
-        res.json({ success: true });
-    } else {
-        res.json({ success: false });
-    }
-});
 // Handle password check
 app.post('/check-password', (req, res) => {
     const { password } = req.body;
@@ -49,7 +39,7 @@ app.post('/upload-face', upload.single('image'), async (req, res) => {
         form.append('image', fs.createReadStream(filePath));
         form.append('name', name);
 
-        const response = await axios.post(`${DEEPSTACK_URL}/face/add`, form, {
+        const response = await axios.post(`${DEEPSTACK_URL}/v1/vision/face/register`, form, {
             headers: form.getHeaders(),
         });
 
@@ -69,7 +59,7 @@ app.post('/recognize-face', upload.single('image'), async (req, res) => {
         const form = new FormData();
         form.append('image', fs.createReadStream(filePath));
 
-        const response = await axios.post(`${DEEPSTACK_URL}/face/recognize`, form, {
+        const response = await axios.post(`${DEEPSTACK_URL}/v1/vision/face/recognize`, form, {
             headers: form.getHeaders(),
         });
 
@@ -89,7 +79,7 @@ app.post('/recognize-license', upload.single('image'), async (req, res) => {
         const form = new FormData();
         form.append('image', fs.createReadStream(filePath));
 
-        const response = await axios.post(`${DEEPSTACK_URL}/licenseplate`, form, {
+        const response = await axios.post(`${DEEPSTACK_URL}/v1/vision/custom/licence-plate`, form, {
             headers: form.getHeaders(),
         });
 
@@ -109,7 +99,7 @@ app.post('/recognize-ocr', upload.single('image'), async (req, res) => {
         const form = new FormData();
         form.append('image', fs.createReadStream(filePath));
 
-        const response = await axios.post(`${DEEPSTACK_URL}/ocr`, form, {
+        const response = await axios.post(`${DEEPSTACK_URL}/v1/vision/ocr`, form, {
             headers: form.getHeaders(),
         });
 

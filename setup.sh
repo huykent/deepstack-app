@@ -13,4 +13,4 @@ cd deepstack-app
 chmod +x install.sh
 
 # Chạy script cài đặt
-sudo ./install.sh
+./install.sh

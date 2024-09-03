@@ -22,7 +22,10 @@ services:
       - deepstack
     environment:
       DEEPSTACK_URL: "http://deepstack-ai:5000"
+<<<<<<< HEAD
       PASSWORD: "9999"
+=======
+>>>>>>> Initial commit
     volumes:
       - ./app:/usr/src/app
     restart: unless-stopped
