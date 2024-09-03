@@ -22,6 +22,7 @@ services:
       - deepstack
     environment:
       DEEPSTACK_URL: "http://deepstack-ai:5000"
+      PASSWORD: "9999"
     volumes:
       - ./app:/usr/src/app
     restart: unless-stopped

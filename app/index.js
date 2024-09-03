@@ -7,78 +7,111 @@ const axios = require('axios');
 const FormData = require('form-data');
 
 const app = express();
-const upload = multer({ dest: 'uploads/' });
+const port = 3000;
 
-// Secure password (store in environment variable)
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'hitpro9999';
-
-// Middleware for parsing JSON and form data
+// Middleware
 app.use(bodyParser.json());
-
-// Serve static files from the public directory
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// API to check password
+// Multer setup
+const upload = multer({ dest: 'uploads/' });
+
+// Read environment variables
+const { DEEPSTACK_URL, PASSWORD } = process.env;
+
+// Handle password check
 app.post('/check-password', (req, res) => {
     const { password } = req.body;
-    
-    if (password === ADMIN_PASSWORD) {
+    if (password === PASSWORD) {
         res.json({ success: true });
     } else {
         res.json({ success: false });
     }
 });
 
-// Handle file uploads and face assignment
-app.post('/upload-face', upload.single('image'), (req, res) => {
-    const name = req.body.name;
+// Handle face upload
+app.post('/upload-face', upload.single('image'), async (req, res) => {
+    try {
+        const { name } = req.body;
+        const filePath = path.join(__dirname, 'uploads', req.file.filename);
+        const form = new FormData();
+        form.append('image', fs.createReadStream(filePath));
+        form.append('name', name);
 
-    if (!name || !req.file) {
-        return res.status(400).json({ error: 'Missing name or image' });
+        const response = await axios.post(`${DEEPSTACK_URL}/face/add`, form, {
+            headers: form.getHeaders(),
+        });
+
+        fs.unlinkSync(filePath); // Remove file after upload
+
+        res.json({ success: response.data.success });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: error.message });
     }
-
-    // Rename the uploaded file
-    const newFileName = `${name}_${Date.now()}${path.extname(req.file.originalname)}`;
-    const newFilePath = path.join('uploads', newFileName);
-
-    fs.renameSync(req.file.path, newFilePath);
-
-    // Save face information (this is just an example, you could store this in a database)
-    const facesDB = './faces.json';
-    const faces = fs.existsSync(facesDB) ? JSON.parse(fs.readFileSync(facesDB)) : [];
-    faces.push({ name: name, imagePath: newFilePath });
-    fs.writeFileSync(facesDB, JSON.stringify(faces, null, 2));
-
-    res.json({ success: true, message: `Image for ${name} uploaded and saved successfully.` });
 });
 
-// Face recognition route
+// Handle face recognition
 app.post('/recognize-face', upload.single('image'), async (req, res) => {
     try {
-        const formData = new FormData();
-        formData.append('image', fs.createReadStream(req.file.path));
+        const filePath = path.join(__dirname, 'uploads', req.file.filename);
+        const form = new FormData();
+        form.append('image', fs.createReadStream(filePath));
 
-        const response = await axios.post(`${process.env.DEEPSTACK_URL || 'http://localhost:5000'}/v1/vision/face/recognize`, formData, {
-            headers: formData.getHeaders()
+        const response = await axios.post(`${DEEPSTACK_URL}/face/recognize`, form, {
+            headers: form.getHeaders(),
         });
 
-        // Match recognized faces with the database
-        const facesDB = './faces.json';
-        const faces = fs.existsSync(facesDB) ? JSON.parse(fs.readFileSync(facesDB)) : [];
-        const recognized = response.data.predictions;
+        fs.unlinkSync(filePath); // Remove file after recognition
 
-        const results = recognized.map(face => {
-            const match = faces.find(f => f.name === face.userid);
-            return match ? { ...face, name: match.name } : face;
-        });
-
-        res.json(results);
+        res.json(response.data);
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: error.message });
     }
 });
 
-// Start server
-app.listen(3000, () => {
-    console.log('Server started on http://localhost:3000');
+// Handle license plate recognition
+app.post('/recognize-license', upload.single('image'), async (req, res) => {
+    try {
+        const filePath = path.join(__dirname, 'uploads', req.file.filename);
+        const form = new FormData();
+        form.append('image', fs.createReadStream(filePath));
+
+        const response = await axios.post(`${DEEPSTACK_URL}/licenseplate`, form, {
+            headers: form.getHeaders(),
+        });
+
+        fs.unlinkSync(filePath); // Remove file after recognition
+
+        res.json(response.data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Handle OCR recognition
+app.post('/recognize-ocr', upload.single('image'), async (req, res) => {
+    try {
+        const filePath = path.join(__dirname, 'uploads', req.file.filename);
+        const form = new FormData();
+        form.append('image', fs.createReadStream(filePath));
+
+        const response = await axios.post(`${DEEPSTACK_URL}/ocr`, form, {
+            headers: form.getHeaders(),
+        });
+
+        fs.unlinkSync(filePath); // Remove file after recognition
+
+        res.json(response.data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
 });
