@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepStack AI WebApp</title>
+    <style>
+        #uploadSection {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>DeepStack AI WebApp</h1>
+
+    <!-- Password Section -->
+    <section>
+        <h2>Enter Password to Access Upload Section</h2>
+        <form id="passwordForm">
+            <input type="password" id="password" placeholder="Enter password" required>
+            <button type="submit">Submit</button>
+        </form>
+    </section>
+
+    <!-- Upload New Faces Section -->
+    <section id="uploadSection">
+        <h2>Upload New Faces</h2>
+        <form action="/upload-face" method="post" enctype="multipart/form-data">
+            <input type="text" name="name" placeholder="Enter person's name" required>
+            <input type="file" name="image" required>
+            <button type="submit">Upload</button>
+        </form>
+    </section>
+
+    <!-- Face Recognition Section -->
+    <section>
+        <h2>Face Recognition</h2>
+        <form action="/recognize-face" method="post" enctype="multipart/form-data">
+            <input type="file" name="image" required>
+            <button type="submit">Submit</button>
+        </form>
+    </section>
+
+    <!-- License Plate Recognition Section -->
+    <section>
+        <h2>License Plate Recognition</h2>
+        <form action="/recognize-license" method="post" enctype="multipart/form-data">
+            <input type="file" name="image" required>
+            <button type="submit">Submit</button>
+        </form>
+    </section>
+
+    <!-- OCR Recognition Section -->
+    <section>
+        <h2>OCR Recognition</h2>
+        <form action="/recognize-ocr" method="post" enctype="multipart/form-data">
+            <input type="file" name="image" required>
+            <button type="submit">Submit</button>
+        </form>
+    </section>
+
+    <script>
+        document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/check-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ password: password })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('uploadSection').style.display = 'block';
+                document.getElementById('passwordForm').style.display = 'none';
+            } else {
+                alert('Incorrect password!');
+            }
+        });
+    </script>
+</body>
+</html>

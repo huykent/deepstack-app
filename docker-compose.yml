@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  deepstack:
+    image: deepquestai/deepstack
+    container_name: deepstack-ai
+    ports:
+      - "5000:5000"
+    environment:
+      VISION-FACE: 'True'
+      VISION-DETECTION: 'True'
+      VISION-PLATE: 'True'
+      VISION-OCR: 'True'
+    restart: unless-stopped
+
+  nodeapp:
+    build: ./app
+    container_name: node-webapp
+    ports:
+      - "3000:3000"
+    depends_on:
+      - deepstack
+    environment:
+      DEEPSTACK_URL: "http://deepstack-ai:5000"
+    volumes:
+      - ./app:/usr/src/app
+    restart: unless-stopped
