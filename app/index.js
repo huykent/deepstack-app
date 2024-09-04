@@ -33,24 +33,26 @@ app.post('/check-password', (req, res) => {
 // Handle face upload
 app.post('/upload-face', upload.single('image'), async (req, res) => {
     try {
-        const { name } = req.body;
+        const { name, userid } = req.body;  // Lấy name và userid từ body
         const filePath = path.join(__dirname, 'uploads', req.file.filename);
         const form = new FormData();
-        form.append('image', fs.createReadStream(filePath));
-        form.append('name', name);
+        
+        form.append('image', fs.createReadStream(filePath));  // Thêm ảnh vào form
+        form.append('userid', userid);  // Thêm userid vào form
 
         const response = await axios.post(`${DEEPSTACK_URL}/v1/vision/face/register`, form, {
             headers: form.getHeaders(),
         });
 
-        fs.unlinkSync(filePath); // Remove file after upload
+        fs.unlinkSync(filePath); // Xóa tệp sau khi upload xong
 
-        res.json({ success: response.data.success });
+        res.json({ success: response.data.success });  // Trả về kết quả thành công
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: error.message });  // Trả về lỗi nếu có
     }
 });
+
 
 // Handle face recognition
 app.post('/recognize-face', upload.single('image'), async (req, res) => {
