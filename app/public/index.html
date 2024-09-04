@@ -24,12 +24,13 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
+            <div id="passwordMessage" class="alert" role="alert" style="display: none;"></div>
         </section>
 
         <!-- Upload New Faces Section -->
         <section id="uploadSection">
             <h2>Upload New Faces</h2>
-            <form action="/upload-face" method="post" enctype="multipart/form-data">
+            <form id="uploadFaceForm" enctype="multipart/form-data">
                 <div class="form-group">
                     <input type="text" name="name" class="form-control" placeholder="Enter person's name" required>
                 </div>
@@ -38,39 +39,43 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Upload</button>
             </form>
+            <div id="uploadFaceMessage" class="alert" role="alert" style="display: none;"></div>
         </section>
 
         <!-- Face Recognition Section -->
         <section>
             <h2>Face Recognition</h2>
-            <form action="/recognize-face" method="post" enctype="multipart/form-data">
+            <form id="recognizeFaceForm" enctype="multipart/form-data">
                 <div class="form-group">
                     <input type="file" name="image" class="form-control-file" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
+            <div id="recognizeFaceMessage" class="alert" role="alert" style="display: none;"></div>
         </section>
 
         <!-- License Plate Recognition Section -->
         <section>
             <h2>License Plate Recognition</h2>
-            <form action="/recognize-license" method="post" enctype="multipart/form-data">
+            <form id="recognizeLicenseForm" enctype="multipart/form-data">
                 <div class="form-group">
                     <input type="file" name="image" class="form-control-file" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
+            <div id="recognizeLicenseMessage" class="alert" role="alert" style="display: none;"></div>
         </section>
 
         <!-- OCR Recognition Section -->
         <section>
             <h2>OCR Recognition</h2>
-            <form action="/recognize-ocr" method="post" enctype="multipart/form-data">
+            <form id="recognizeOcrForm" enctype="multipart/form-data">
                 <div class="form-group">
                     <input type="file" name="image" class="form-control-file" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
+            <div id="recognizeOcrMessage" class="alert" role="alert" style="display: none;"></div>
         </section>
     </div>
 
@@ -88,12 +93,97 @@
             });
 
             const result = await response.json();
+            const messageDiv = document.getElementById('passwordMessage');
             if (result.success) {
                 document.getElementById('uploadSection').style.display = 'block';
                 document.getElementById('passwordForm').style.display = 'none';
+                messageDiv.className = 'alert alert-success';
+                messageDiv.textContent = 'Password correct. Upload section is now visible.';
             } else {
-                alert('Incorrect password!');
+                messageDiv.className = 'alert alert-danger';
+                messageDiv.textContent = 'Incorrect password!';
             }
+            messageDiv.style.display = 'block';
+        });
+
+        document.getElementById('uploadFaceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const response = await fetch('/upload-face', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            const messageDiv = document.getElementById('uploadFaceMessage');
+            if (result.success) {
+                messageDiv.className = 'alert alert-success';
+                messageDiv.textContent = 'Face uploaded successfully.';
+            } else {
+                messageDiv.className = 'alert alert-danger';
+                messageDiv.textContent = 'Failed to upload face.';
+            }
+            messageDiv.style.display = 'block';
+        });
+
+        document.getElementById('recognizeFaceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const response = await fetch('/recognize-face', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            const messageDiv = document.getElementById('recognizeFaceMessage');
+            if (result.userid && result.confidence !== undefined) {
+                messageDiv.className = 'alert alert-success';
+                messageDiv.innerHTML = `User ID: ${result.userid}<br>Confidence: ${result.confidence}<br>Processing Duration: ${result.duration} ms`;
+            } else {
+                messageDiv.className = 'alert alert-danger';
+                messageDiv.textContent = 'Failed to recognize face.';
+            }
+            messageDiv.style.display = 'block';
+        });
+
+        document.getElementById('recognizeLicenseForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const response = await fetch('/recognize-license', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            const messageDiv = document.getElementById('recognizeLicenseMessage');
+            if (result.license_plate) {
+                messageDiv.className = 'alert alert-success';
+                messageDiv.innerHTML = `License Plate: ${result.license_plate}<br>Confidence: ${result.confidence}<br>Processing Duration: ${result.duration} ms`;
+            } else {
+                messageDiv.className = 'alert alert-danger';
+                messageDiv.textContent = 'Failed to recognize license plate.';
+            }
+            messageDiv.style.display = 'block';
+        });
+
+        document.getElementById('recognizeOcrForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const response = await fetch('/recognize-ocr', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            const messageDiv = document.getElementById('recognizeOcrMessage');
+            if (result.text) {
+                messageDiv.className = 'alert alert-success';
+                messageDiv.innerHTML = `Recognized Text: ${result.text}<br>Processing Duration: ${result.duration} ms`;
+            } else {
+                messageDiv.className = 'alert alert-danger';
+                messageDiv.textContent = 'Failed to recognize text.';
+            }
+            messageDiv.style.display = 'block';
         });
     </script>
 </body>

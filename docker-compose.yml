@@ -21,8 +21,7 @@ services:
     depends_on:
       - deepstack
     environment:
-      DEEPSTACK_URL: "http://localhost:5000"
-
+      DEEPSTACK_URL: "http://192.168.0.23:5000"
       PASSWORD: "9999"
 
     volumes:
