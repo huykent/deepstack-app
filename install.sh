@@ -19,3 +19,5 @@ echo "Đang build và chạy các container..."
 docker-compose up --build -d
 
 echo "Ứng dụng đã được cài đặt và chạy thành công!"
+echo "Truy cập http://localhost:3000 để sử dụng Web Interface."
+echo "Xem file FULL_GUIDE.md để biết cách tích hợp vào Home Assistant."
