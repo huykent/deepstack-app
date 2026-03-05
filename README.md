@@ -37,7 +37,7 @@ cd deepstack-app
 Tạo một tệp `.env` ở thư mục ứng dụng (ví dụ: `app/.env`) và cấu hình các biến sau:
 
 ```env
-DEEPSTACK_URL=http://localhost:5000
+DEEPSTACK_URL=http://localhost:15679
 PASSWORD=yourpassword
 ```
 
@@ -52,7 +52,7 @@ npm install
 ```bash
 npm start
 ```
-Ứng dụng sẽ chạy tại `http://localhost:3000`.
+Ứng dụng sẽ chạy tại `http://localhost:15678`.
 
 ### 5. Cài đặt Docker Compose (Tùy chọn)
 
@@ -66,7 +66,7 @@ docker-compose up -d
 
 ### 6. Truy cập ứng dụng
 
-Sau khi khởi động server, bạn có thể truy cập ứng dụng qua `http://localhost:3000`.
+Sau khi khởi động server, bạn có thể truy cập ứng dụng qua `http://localhost:15678`.
 
 ### 7. Bảo mật khi tải lên khuôn mặt
 
@@ -150,7 +150,7 @@ command_line:
       name: Kết quả nhận diện khuôn mặt
       unique_id: face_recognition_result
       # Đổi <IP_APP> thành địa chỉ IP máy tính đang chạy ứng dụng Node.js của bạn
-      command: "curl -s -X POST -F 'image=@/config/www/camera_snapshot.jpg' http://<IP_APP>:3000/recognize-face"
+      command: "curl -s -X POST -F 'image=@/config/www/camera_snapshot.jpg' http://<IP_APP>:15678/recognize-face"
       scan_interval: 86400 # Cập nhật theo yêu cầu, không phải cập nhật liên tục để giảm tải CPU
       value_template: "{{ value_json.userid | default('unknown') }}"
       json_attributes:
@@ -161,7 +161,7 @@ command_line:
   - sensor:
       name: Kết quả nhận diện biển số
       unique_id: license_plate_recognition_result
-      command: "curl -s -X POST -F 'image=@/config/www/camera_snapshot.jpg' http://<IP_APP>:3000/recognize-license"
+      command: "curl -s -X POST -F 'image=@/config/www/camera_snapshot.jpg' http://<IP_APP>:15678/recognize-license"
       scan_interval: 86400 
       value_template: "{{ value_json.license_plate | default('unknown') }}"
       json_attributes:

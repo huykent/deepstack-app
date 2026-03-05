@@ -5,7 +5,7 @@ services:
     image: deepquestai/deepstack
     container_name: deepstack-ai
     ports:
-      - "5000:5000"
+      - "15679:15679"
     environment:
       VISION-FACE: 'True'
       VISION-DETECTION: 'True'
@@ -17,11 +17,11 @@ services:
     build: ./app
     container_name: node-webapp
     ports:
-      - "3000:3000"
+      - "15678:15678"
     depends_on:
       - deepstack
     environment:
-      DEEPSTACK_URL: "http://deepstack:5000"
+      DEEPSTACK_URL: "http://deepstack:15679"
       PASSWORD: "9999"
 
     volumes:

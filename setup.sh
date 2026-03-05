@@ -111,5 +111,5 @@ echo -e "\e[34mKhởi động các dịch vụ Docker...\e[0m"
 docker-compose up -d
 
 echo -e "\e[32mHoàn tất cài đặt và khởi động dịch vụ.\e[0m"
-echo -e "\e[34mỨng dụng đang chạy tại: http://localhost:3000\e[0m"
+echo -e "\e[34mỨng dụng đang chạy tại: http://localhost:15678\e[0m"
 echo -e "\e[33mĐể tích hợp Home Assistant, vui lòng tham khảo file: FULL_GUIDE.md\e[0m"

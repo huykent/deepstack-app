@@ -10,8 +10,8 @@ Tài liệu này tổng hợp toàn bộ cách thức hoạt động, các chứ
 sequenceDiagram
     participant Cam as Camera (IP)
     participant HA as Home Assistant
-    participant Node as Node.js App (Cổng 3000)
-    participant DS as DeepStack AI (Cổng 5000)
+    participant Node as Node.js App (Cổng 15678)
+    participant DS as DeepStack AI (Cổng 15679)
     participant Web as Web Frontend (Người dùng)
 
     %% Luồng xem website và cập nhật khuôn mặt
@@ -59,6 +59,7 @@ sequenceDiagram
 1.  **Nhận diện khuôn mặt (Face Recognition)**
     *   API Endpoint: `/recognize-face`
     *   Công dụng: Nhận diện xem người trong ảnh đã được đăng ký trước đó hay chưa.
+    *   Cổng truy cập: 15678
 2.  **Đăng ký khuôn mặt mới (Face Registration)**
     *   API Endpoint: `/upload-face`
     *   Công dụng: Lưu trữ đặc điểm nhận dạng của một người, gán với một ID (Tên). (Cần nhập Password).
@@ -113,13 +114,13 @@ Bạn có thể test trực tiếp bằng terminal / SSH trước khi đưa vào
 
 **Test Nhận diện khuôn mặt:**
 ```bash
-curl -X POST -F "image=@/duong/dan/toi/anh_thu_nghiem.jpg" http://localhost:3000/recognize-face
+curl -X POST -F "image=@/duong/dan/toi/anh_thu_nghiem.jpg" http://localhost:15678/recognize-face
 # Kết quả mong đợi: {"success":true,"userid":"Huy","confidence":0.99}
 ```
 
 **Test Đăng ký khuôn mặt mới (Bỏ qua giao diện Web):**
 ```bash
-curl -X POST -F "image=@/duong/dan/toi/anh.jpg" -F "userid=HuyQuang" http://localhost:3000/upload-face
+curl -X POST -F "image=@/duong/dan/toi/anh.jpg" -F "userid=HuyQuang" http://localhost:15678/upload-face
 ```
 
 ---
@@ -135,7 +136,7 @@ command_line:
   - sensor:
       name: AI Face
       unique_id: face_recognition_result
-      command: "curl -s -X POST -F 'image=@/config/www/snapshot.jpg' http://<IP_MAY_CHAY_NODE>:3000/recognize-face"
+      command: "curl -s -X POST -F 'image=@/config/www/snapshot.jpg' http://<IP_MAY_CHAY_NODE>:15678/recognize-face"
       scan_interval: 86400 # Cập nhật thủ công
       value_template: "{{ value_json.userid | default('unknown') }}"
       json_attributes:
@@ -145,7 +146,7 @@ command_line:
   - sensor:
       name: AI License Plate
       unique_id: license_plate_recognition_result
-      command: "curl -s -X POST -F 'image=@/config/www/snapshot.jpg' http://<IP_MAY_CHAY_NODE>:3000/recognize-license"
+      command: "curl -s -X POST -F 'image=@/config/www/snapshot.jpg' http://<IP_MAY_CHAY_NODE>:15678/recognize-license"
       scan_interval: 86400
       value_template: "{{ value_json.license_plate | default('unknown') }}"
 ```
