@@ -137,21 +137,100 @@ Script này sẽ tự động clone repository, cấp quyền thực thi cho scr
 
 ## Tích hợp Home Assistant (Mới)
 
-Ứng dụng đã được tối ưu hóa cấu trúc JSON trả về để dễ dàng tích hợp vào Home Assistant thông qua tiện ích `command_line` (hoặc REST sensor).
+Ứng dụng đã được tối ưu hóa cấu trúc JSON trả về để dễ dàng tích hợp vào Home Assistant thông qua tiện ích `command_line` (hoặc REST sensor). Dưới đây là ví dụ cấu hình chi tiết, từ việc tạo cảm biến đến Tự động hóa (Automations).
 
-Ví dụ cấu hình cho nhận diện khuôn mặt:
+### 1. Khai báo Command Line Sensors
+
+Thêm dòng sau vào file `configuration.yaml` của Home Assistant để tạo các cảm biến lấy dữ liệu nhận diện:
+
 ```yaml
 command_line:
+  # Cảm biến Nhận diện khuôn mặt (Trả về Tên người - userid)
   - sensor:
       name: Kết quả nhận diện khuôn mặt
-      command: "curl -X POST -F 'image=@/config/www/camera_snapshot.jpg' http://<IP_APP>:3000/recognize-face"
+      unique_id: face_recognition_result
+      # Đổi <IP_APP> thành địa chỉ IP máy tính đang chạy ứng dụng Node.js của bạn
+      command: "curl -s -X POST -F 'image=@/config/www/camera_snapshot.jpg' http://<IP_APP>:3000/recognize-face"
+      scan_interval: 86400 # Cập nhật theo yêu cầu, không phải cập nhật liên tục để giảm tải CPU
       value_template: "{{ value_json.userid | default('unknown') }}"
+      json_attributes:
+        - confidence
+        - duration
+
+  # Cảm biến Nhận diện biển số xe (Trả về Biển số)
+  - sensor:
+      name: Kết quả nhận diện biển số
+      unique_id: license_plate_recognition_result
+      command: "curl -s -X POST -F 'image=@/config/www/camera_snapshot.jpg' http://<IP_APP>:3000/recognize-license"
+      scan_interval: 86400 
+      value_template: "{{ value_json.license_plate | default('unknown') }}"
       json_attributes:
         - confidence
         - duration
 ```
 
-Tương tự cho nhận diện biển số (`/recognize-license`) lấy `value_json.license_plate`, và ảnh chứa chữ (`/recognize-ocr`) lấy `value_json.text`.
+*Lưu ý: Khởi động lại Home Assistant sau khi lưu `configuration.yaml` để các cảm biến này bắt đầu hoạt động.*
+
+### 2. Tạo Script tự động chụp ảnh và cập nhật cảm biến
+
+Để không phải "spam" DeepStack quét liên tục, bạn hãy viết một kịch bản (`script`) dùng để **chụp ảnh từ camera** -> **lưu đè lên file `/config/www/camera_snapshot.jpg`** -> **ép dòng lệnh trên của sensor cập nhật thủ công**.
+
+Thêm vào `scripts.yaml` hoặc giao diện tạo Script:
+
+```yaml
+# scripts.yaml
+scan_person_at_door:
+  alias: "Quét khuôn mặt ở cửa"
+  sequence:
+    # Bước 1: Yêu cầu Camera chụp lại một bức ảnh và lưu vào thư mục www
+    - service: camera.snapshot
+      target:
+        entity_id: camera.truoc_nha_camera # Thay thế bằng entity camera của bạn
+      data:
+        filename: /config/www/camera_snapshot.jpg
+    
+    # Bước 2: Chờ một chút để file lưu xong hoàn toàn
+    - delay:
+        milliseconds: 500
+
+    # Bước 3: Ép ngắt cập nhật thông tin cảm biến (gửi file vừa lưu vào nodejs)
+    - service: homeassistant.update_entity
+      target:
+        entity_id: sensor.ket_qua_nhan_dien_khuon_mat
+```
+
+### 3. Tự động hóa phát hiện và thông báo (Automations)
+
+Bây giờ bạn có thể kích hoạt tiến trình này dưa trên một sự kiện cụ thể (như khi motion sensor kích hoạt, chuông cửa reo, cửa mở...) và gửi thông báo điện thoại:
+
+```yaml
+# automations.yaml
+- alias: "Chuông cửa reo - Nhận diện khuôn mặt"
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.nut_nhan_chuong_cua
+      to: "on"
+  action:
+    # 1. Chạy script để quét khuôn mặt ngay lập tức
+    - service: script.scan_person_at_door
+    
+    # 2. Đợi 2 giây cho ứng dụng Face Recognition làm việc
+    - delay:
+        seconds: 2
+        
+    # 3. Gửi thông báo kèm ảnh theo tên người nhận diện được
+    - service: notify.mobile_app_dien_thoai_cua_ban
+      data:
+        title: "Có khách ở cửa!"
+        message: >
+          {% if is_state('sensor.ket_qua_nhan_dien_khuon_mat', 'unknown') %}
+            Phát hiện người lạ đang đứng trước cửa nhà!
+          {% else %}
+            Có {{ states('sensor.ket_qua_nhan_dien_khuon_mat') }} ở trước cửa với độ chính xác {{ state_attr('sensor.ket_qua_nhan_dien_khuon_mat', 'confidence') * 100 }}%.
+          {% endif %}
+        data:
+          image: "/local/camera_snapshot.jpg"
+```
 
 ## Giấy phép
 
