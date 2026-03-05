@@ -66,7 +66,17 @@ app.post('/recognize-face', upload.single('image'), async (req, res) => {
 
         fs.unlinkSync(filePath); // Remove file after recognition
 
-        res.json(response.data);
+        let responseData = response.data;
+        if (responseData.success && responseData.predictions && responseData.predictions.length > 0) {
+            let bestPrediction = responseData.predictions[0];
+            responseData = {
+                ...responseData,
+                userid: bestPrediction.userid,
+                confidence: bestPrediction.confidence
+            };
+        }
+
+        res.json(responseData);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: error.message });
@@ -86,7 +96,18 @@ app.post('/recognize-license', upload.single('image'), async (req, res) => {
 
         fs.unlinkSync(filePath); // Remove file after recognition
 
-        res.json(response.data);
+        let responseData = response.data;
+        if (responseData.success && responseData.predictions && responseData.predictions.length > 0) {
+            // Assuming custom model returns 'label', 'plate', or it's implicitly the label
+            let bestPrediction = responseData.predictions[0];
+            responseData = {
+                ...responseData,
+                license_plate: bestPrediction.label || bestPrediction.plate || bestPrediction.userid,
+                confidence: bestPrediction.confidence
+            };
+        }
+
+        res.json(responseData);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: error.message });
@@ -106,7 +127,18 @@ app.post('/recognize-ocr', upload.single('image'), async (req, res) => {
 
         fs.unlinkSync(filePath); // Remove file after recognition
 
-        res.json(response.data);
+        let responseData = response.data;
+        if (responseData.success && responseData.predictions && responseData.predictions.length > 0) {
+            // Usually OCR returns an array of predictions with 'text'
+            // We can concatenate them or just return the first one
+            let fullText = responseData.predictions.map(p => p.text).join(' ');
+            responseData = {
+                ...responseData,
+                text: fullText
+            };
+        }
+
+        res.json(responseData);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: error.message });
