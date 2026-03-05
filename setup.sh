@@ -114,6 +114,22 @@ echo -e "\e[32m2) Bản GPU (Yêu cầu có Card NVIDIA & Nvidia Container Toolk
 read -p "Nhập lựa chọn của bạn (1 hoặc 2): " DEEPSTACK_CHOICE
 
 if [ "$DEEPSTACK_CHOICE" == "2" ]; then
+    echo -e "\e[34mĐang kiểm tra môi trường GPU (Nvidia)...\e[0m"
+    if ! command -v nvidia-smi &> /dev/null; then
+        echo -e "\e[31m[CẢNH BÁO]: Không tìm thấy Driver Nvidia (nvidia-smi).\e[0m"
+        echo -e "\e[33mDeepStack bản GPU yêu cầu Card Nvidia và Driver đã cài đặt.\e[0m"
+        read -p "Bạn có muốn tiếp tục cài đặt bản GPU không? (y/n): " CONTINUE_GPU
+        if [ "$CONTINUE_GPU" != "y" ]; then exit 1; fi
+    else
+        echo -e "\e[32mTìm thấy Driver Nvidia. Thông tin GPU:\e[0m"
+        nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader
+    fi
+
+    if ! docker info | grep -i "nvidia" &> /dev/null; then
+        echo -e "\e[31m[CẢNH BÁO]: Docker chưa được cấu hình với Nvidia Runtime (nvidia-docker).\e[0m"
+        echo -e "\e[33mHệ thống có thể không nhận diện được GPU bên trong Container.\e[0m"
+    fi
+
     echo -e "\e[34mĐang cấu hình sử dụng bản GPU...\e[0m"
     sed -i 's/image: deepquestai\/deepstack/image: deepquestai\/deepstack:gpu/g' docker-compose.yml
 else
