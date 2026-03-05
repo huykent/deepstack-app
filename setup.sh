@@ -106,6 +106,21 @@ fi
 echo -e "\e[34mĐang cài đặt các phụ thuộc Node.js...\e[0m"
 npm install
 
+# Lựa chọn phiên bản DeepStack (CPU hoặc GPU)
+echo -e "\e[34m-------------------------------------------------\e[0m"
+echo -e "\e[33mBạn muốn sử cài đặt DeepStack thông thường (CPU) hay GPU (Nvidia)?\e[0m"
+echo -e "\e[32m1) Bản CPU (Mặc định - Chạy trên mọi thiết bị)\e[0m"
+echo -e "\e[32m2) Bản GPU (Yêu cầu có Card NVIDIA & Nvidia Container Toolkit)\e[0m"
+read -p "Nhập lựa chọn của bạn (1 hoặc 2): " DEEPSTACK_CHOICE
+
+if [ "$DEEPSTACK_CHOICE" == "2" ]; then
+    echo -e "\e[34mĐang cấu hình sử dụng bản GPU...\e[0m"
+    sed -i 's/image: deepquestai\/deepstack/image: deepquestai\/deepstack:gpu/g' docker-compose.yml
+else
+    echo -e "\e[34mĐang cấu hình sử dụng bản CPU...\e[0m"
+    sed -i 's/image: deepquestai\/deepstack:gpu/image: deepquestai\/deepstack/g' docker-compose.yml
+fi
+
 # Khởi động các dịch vụ Docker
 echo -e "\e[34mKhởi động các dịch vụ Docker...\e[0m"
 docker-compose up -d
