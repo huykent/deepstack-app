@@ -115,19 +115,38 @@ read -p "Nhập lựa chọn của bạn (1 hoặc 2): " DEEPSTACK_CHOICE
 
 if [ "$DEEPSTACK_CHOICE" == "2" ]; then
     echo -e "\e[34mĐang kiểm tra môi trường GPU (Nvidia)...\e[0m"
+    
+    # 1. Kiểm tra Driver Nvidia
     if ! command -v nvidia-smi &> /dev/null; then
-        echo -e "\e[31m[CẢNH BÁO]: Không tìm thấy Driver Nvidia (nvidia-smi).\e[0m"
-        echo -e "\e[33mDeepStack bản GPU yêu cầu Card Nvidia và Driver đã cài đặt.\e[0m"
-        read -p "Bạn có muốn tiếp tục cài đặt bản GPU không? (y/n): " CONTINUE_GPU
-        if [ "$CONTINUE_GPU" != "y" ]; then exit 1; fi
+        echo -e "\e[31m[CẢNH BÁO]: Không tìm thấy Driver Nvidia.\e[0m"
+        read -p "Bạn có muốn thử cài đặt Driver Nvidia tự động không? (y/n): " INSTALL_DRIVER
+        if [ "$INSTALL_DRIVER" == "y" ]; then
+            echo -e "\e[34mĐang cài đặt Driver Nvidia (ubuntu-drivers)... \e[0m"
+            ubuntu-drivers autoinstall || apt-get install -y nvidia-driver-470
+            echo -e "\e[33mVui lòng KHỞI ĐỘNG LẠI MÁY sau khi cài đặt xong Driver để áp dụng thay đổi.\e[0m"
+        fi
     else
         echo -e "\e[32mTìm thấy Driver Nvidia. Thông tin GPU:\e[0m"
         nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader
     fi
 
+    # 2. Kiểm tra và cài đặt Nvidia Container Toolkit (để Docker dùng được GPU)
     if ! docker info | grep -i "nvidia" &> /dev/null; then
-        echo -e "\e[31m[CẢNH BÁO]: Docker chưa được cấu hình với Nvidia Runtime (nvidia-docker).\e[0m"
-        echo -e "\e[33mHệ thống có thể không nhận diện được GPU bên trong Container.\e[0m"
+        echo -e "\e[31m[CẢNH BÁO]: Docker chưa hỗ trợ Nvidia Runtime.\e[0m"
+        read -p "Bạn có muốn cài đặt Nvidia Container Toolkit để Docker nhận GPU không? (y/n): " INSTALL_TOOLKIT
+        if [ "$INSTALL_TOOLKIT" == "y" ]; then
+            echo -e "\e[34mĐang thêm repository và cài đặt nvidia-container-toolkit...\e[0m"
+            distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
+            && curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+            && curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
+            sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+            tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+            
+            apt-get update && apt-get install -y nvidia-container-toolkit
+            nvidia-ctk runtime configure --runtime=docker
+            systemctl restart docker
+            echo -e "\e[32mCài đặt Toolkit hoàn tất và đã restart Docker.\e[0m"
+        fi
     fi
 
     echo -e "\e[34mĐang cấu hình sử dụng bản GPU...\e[0m"
