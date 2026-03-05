@@ -34,11 +34,11 @@ cd deepstack-app
 
 ### 2. Cấu hình biến môi trường
 
-Tạo một tệp `.env` ở thư mục gốc của dự án và cấu hình các biến sau:
+Tạo một tệp `.env` ở thư mục ứng dụng (ví dụ: `app/.env`) và cấu hình các biến sau:
 
 ```env
 DEEPSTACK_URL=http://localhost:5000
-ADMIN_PASSWORD=yourpassword
+PASSWORD=yourpassword
 ```
 
 ### 3. Cài đặt các phụ thuộc
@@ -52,7 +52,6 @@ npm install
 ```bash
 npm start
 ```
-
 Ứng dụng sẽ chạy tại `http://localhost:3000`.
 
 ### 5. Cài đặt Docker Compose (Tùy chọn)
@@ -71,7 +70,7 @@ Sau khi khởi động server, bạn có thể truy cập ứng dụng qua `http
 
 ### 7. Bảo mật khi tải lên khuôn mặt
 
-Để tải lên khuôn mặt mới vào hệ thống, bạn cần nhập đúng mật khẩu. Mật khẩu này được cấu hình trong tệp `.env` bằng biến `ADMIN_PASSWORD`.
+Để tải lên khuôn mặt mới vào hệ thống, bạn cần nhập đúng mật khẩu. Mật khẩu này được cấu hình trong tệp `.env` bằng biến `PASSWORD`.
 
 ### 8. Dừng ứng dụng
 
@@ -136,12 +135,24 @@ chmod +x install.sh
 Script này sẽ tự động clone repository, cấp quyền thực thi cho script cài đặt, và chạy nó để hoàn tất cài đặt và cấu hình.
 
 
+## Tích hợp Home Assistant (Mới)
+
+Ứng dụng đã được tối ưu hóa cấu trúc JSON trả về để dễ dàng tích hợp vào Home Assistant thông qua tiện ích `command_line` (hoặc REST sensor).
+
+Ví dụ cấu hình cho nhận diện khuôn mặt:
+```yaml
+command_line:
+  - sensor:
+      name: Kết quả nhận diện khuôn mặt
+      command: "curl -X POST -F 'image=@/config/www/camera_snapshot.jpg' http://<IP_APP>:3000/recognize-face"
+      value_template: "{{ value_json.userid | default('unknown') }}"
+      json_attributes:
+        - confidence
+        - duration
+```
+
+Tương tự cho nhận diện biển số (`/recognize-license`) lấy `value_json.license_plate`, và ảnh chứa chữ (`/recognize-ocr`) lấy `value_json.text`.
+
 ## Giấy phép
 
 Dự án này được cấp phép theo Giấy phép MIT.
-
-
-## Giấy phép
-
-Dự án này được cấp phép theo Giấy phép MIT.
-
